@@ -30,6 +30,8 @@ import java.io.Reader;
 import java.io.Serializable;
 import java.io.Writer;
 
+import org.apache.commons.io.FileUtils;
+
 /**
  * @author ypujante@linkedin.com
  *
@@ -313,5 +315,15 @@ public class IOUtils
    */
   protected IOUtils()
   {
+  }
+
+  public static boolean move(File sourceFile, File destinationFile) {
+    try {
+      FileUtils.copyFile(sourceFile, destinationFile);
+      FileUtils.deleteQuietly(sourceFile);
+      return true;
+    } catch(IOException ex) {
+      return false;
+    }
   }
 }

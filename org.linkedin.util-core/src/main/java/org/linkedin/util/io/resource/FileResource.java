@@ -209,4 +209,19 @@ public class FileResource extends AbstractResource
     }
     return frp.createResource(path);
   }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    FileResource other = (FileResource) obj;
+    if (_file == null || other._file != null || !_file.getAbsolutePath().equals(other._file.getAbsolutePath())) {
+      return false;
+    }
+    return true;
+  }
 }

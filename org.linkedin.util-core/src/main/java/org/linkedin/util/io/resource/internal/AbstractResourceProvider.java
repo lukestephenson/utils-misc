@@ -16,15 +16,18 @@
 
 package org.linkedin.util.io.resource.internal;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.tools.ant.util.FileUtils;
 import org.linkedin.util.io.PathUtils;
 import org.linkedin.util.io.resource.Resource;
 import org.linkedin.util.io.resource.ResourceFilter;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author ypujante@linkedin.com
@@ -100,6 +103,16 @@ public abstract class AbstractResourceProvider implements InternalResourceProvid
   {
     if(relativePath == null)
       return null;
+
+    if (isWindowsOS()) {
+      try {
+        relativePath = URLDecoder.decode(relativePath, "UTF-8");
+        if (relativePath.contains("\\")) {
+          relativePath = relativePath.replaceAll("\\", "/");
+        }
+      } catch (UnsupportedEncodingException ex) {
+      }
+    }
 
     URI relativeURI = URI.create(relativePath).normalize(); // normalize removes leading . 
 
@@ -180,5 +193,14 @@ public abstract class AbstractResourceProvider implements InternalResourceProvid
     }
     else
       return null;
+  }
+
+  private boolean isWindowsOS() {
+   String os = System.getProperty("os.name");
+   if (os.contains("Windows") || os.contains("windows")) {
+    return true;
+   } else {
+    return false;
+   }
   }
 }
