@@ -59,9 +59,17 @@ class GroovyNetUtils
       // ok will handle below
     }
 
-    if(!uri?.scheme)
-    {
-      uri = new File(s.toString()).toURI()
+    if(!uri?.scheme) {
+      // handle relative vs absolute paths. This code is as evil as hell.
+      // note that even here, 'absolute' paths may really be relative to another directory.
+      // This changes came about because windows treats '/' as 'C:/' which wreaks havoc on this library.
+      if (s.toString().startsWith('/')) {
+        // using the 4 argument constructor which creates a URI with just a path.
+        uri = new URI("file", null, s.toString(), null)
+      } else {
+        // this is a relative path to the current directory.
+        uri = new File(s.toString()).toURI()
+      }
     }
 
     return uri
