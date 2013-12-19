@@ -222,6 +222,8 @@ class SerializableFileResource implements Resource, Serializable
     if(!o || getClass() != o.class) return false
 
     if(_fileResource != o._fileResource) return false
+    
+    if (!(_fileResource.equals(o._fileResource))) return false
 
     return true
   }

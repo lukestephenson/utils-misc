@@ -296,7 +296,9 @@ class GroovyIOUtils extends IOUtils
         // somehow the rename operation did not work => delete new file (will happen in the finally)
         // and throw an exception thus effectively leaving the file system in the same state as
         // when the method was called
-        throw new IOException("Unable to rename ${newFile} to ${toFile}")
+        if (!IOUtils.move(newFile, toFile)) {
+          throw new IOException("Unable to rename ${newFile} to ${toFile}")
+        }
       }
 
       return res
