@@ -45,6 +45,7 @@ spec.scm = 'git'
  */
 spec.external = [
   ant: 'org.apache.ant:ant:1.8.2',
+  commonsio: 'commons-io:commons-io:2.0.1',
   groovy: "org.codehaus.groovy:groovy-all:${spec.versions.groovy}",
   json: 'org.json:json:20090211',
   jacksoncore: "com.fasterxml.jackson.core:jackson-core:${spec.versions.jackson}",

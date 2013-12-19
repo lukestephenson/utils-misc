@@ -24,7 +24,6 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.tools.ant.util.FileUtils;
 import org.linkedin.util.io.PathUtils;
 import org.linkedin.util.io.resource.Resource;
 import org.linkedin.util.io.resource.ResourceFilter;
