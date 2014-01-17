@@ -40,6 +40,9 @@ public abstract class AbstractResource implements InternalResource
    */
   protected AbstractResource(InternalResourceProvider resourceProvider, String path)
   {
+    if(path != null && !path.isEmpty() && path.indexOf("\\") > 0){
+        path = path.replace("\\", "/");
+    }
     if(!path.startsWith("/"))
       throw new IllegalArgumentException(path + " must start with /");
     if(resourceProvider == null)
