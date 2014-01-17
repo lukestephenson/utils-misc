@@ -291,7 +291,8 @@ class GroovyIOUtils extends IOUtils
     {
       def res = closure(newFile)
 
-      if(newFile.exists() && !newFile.renameTo(toFile))
+      //if(newFile.exists() && !newFile.renameTo(toFile))
+      if(newFile.exists() && !isFileRenameSuccessFul(newFile, toFile))
       {
         // somehow the rename operation did not work => delete new file (will happen in the finally)
         // and throw an exception thus effectively leaving the file system in the same state as
@@ -311,6 +312,46 @@ class GroovyIOUtils extends IOUtils
     }
   }
 
+/**
+     * isFileRenameSuccessFul method creates a backup copy if file already exists and then
+     * rename temp file. If rename operation fails then it moves the backup file to original one.
+     *
+     * @param newFile
+     * @param toFile
+     * @return true when file rename operation was successful else false
+     */
+    static boolean isFileRenameSuccessFul(File newFile, File toFile)
+    {
+        boolean isFileMoveSuccess = true
+        String fileName
+        String backFileName
+        Path toFilePath
+        if (toFile.exists()) {
+            try {
+                fileName = toFile.canonicalPath
+                backFileName = fileName + ".backup"
+                toFilePath = Paths.get(fileName).toRealPath()
+                Files.move(toFilePath, toFilePath.resolveSibling(backFileName), StandardCopyOption.REPLACE_EXISTING)
+            }catch (IOException ioExp) {
+                isFileMoveSuccess = false
+            }
+        }else{
+            isFileMoveSuccess = false
+        }
+
+        //rename temp config file to original config file
+        boolean isRenameSuccess =  newFile.renameTo(toFile)
+
+        /**
+         * Move backup copy to original if move was success and rename file was unsuccessful.
+         */
+        if(isFileMoveSuccess && !isRenameSuccess){
+            Path backFilePath = Paths.get(backFileName).toRealPath()
+            Files.move(backFilePath, backFilePath.resolveSibling(fileName), StandardCopyOption.REPLACE_EXISTING)
+        }
+       return isRenameSuccess;
+    }
+    
   /**
    * Fetches the file pointed to by the location. The location can be <code>File</code>,
    * a <code>String</code> or <code>URI</code> and must contain a scheme. Example of locations:
