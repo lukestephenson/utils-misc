@@ -31,6 +31,8 @@ import org.linkedin.groovy.util.lang.GroovyLangUtils
 import java.nio.file.Files
 import java.nio.file.NotDirectoryException
 import java.nio.file.Path
+import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
 
 /**
  * IO related utilities
@@ -291,7 +293,6 @@ class GroovyIOUtils extends IOUtils
     {
       def res = closure(newFile)
 
-      //if(newFile.exists() && !newFile.renameTo(toFile))
       if(newFile.exists() && !isFileRenameSuccessFul(newFile, toFile))
       {
         // somehow the rename operation did not work => delete new file (will happen in the finally)
@@ -323,33 +324,43 @@ class GroovyIOUtils extends IOUtils
     static boolean isFileRenameSuccessFul(File newFile, File toFile)
     {
         boolean isFileMoveSuccess = true
+        boolean isRenameSuccess = true
         String fileName
         String backFileName
         Path toFilePath
-        if (toFile.exists()) {
-            try {
-                fileName = toFile.canonicalPath
-                backFileName = fileName + ".backup"
-                toFilePath = Paths.get(fileName).toRealPath()
-                Files.move(toFilePath, toFilePath.resolveSibling(backFileName), StandardCopyOption.REPLACE_EXISTING)
-            }catch (IOException ioExp) {
+        try{
+            if (toFile.exists() && toFile.isFile()) {
+                try {
+                    fileName = toFile.canonicalPath
+                    backFileName = fileName + ".backup"
+                    toFilePath = Paths.get(fileName).toRealPath()
+                    Files.move(toFilePath, toFilePath.resolveSibling(backFileName), StandardCopyOption.REPLACE_EXISTING)
+                }catch (IOException ioExp) {
+                    isFileMoveSuccess = false
+                }
+            }else{
                 isFileMoveSuccess = false
             }
-        }else{
-            isFileMoveSuccess = false
-        }
 
-        //rename temp config file to original config file
-        boolean isRenameSuccess =  newFile.renameTo(toFile)
+            //rename temp config file to original config file
+            isRenameSuccess =  newFile.renameTo(toFile)
 
-        /**
-         * Move backup copy to original if move was success and rename file was unsuccessful.
-         */
-        if(isFileMoveSuccess && !isRenameSuccess){
-            Path backFilePath = Paths.get(backFileName).toRealPath()
-            Files.move(backFilePath, backFilePath.resolveSibling(fileName), StandardCopyOption.REPLACE_EXISTING)
+            /**
+             * Move backup copy to original if move was success and rename file was unsuccessful.
+             */
+            if(isFileMoveSuccess && !isRenameSuccess){
+                Path backFilePath = Paths.get(backFileName).toRealPath()
+                Files.move(backFilePath, backFilePath.resolveSibling(fileName), StandardCopyOption.REPLACE_EXISTING)
+            }
+        }finally{
+            //Delete the backed up file.
+            if(backFileName != null && !backFileName.isEmpty()){
+                File bkFile = new File(backFileName)
+                if(bkFile.exists())
+                    bkFile.delete()
+            }
         }
-       return isRenameSuccess;
+       return isRenameSuccess
     }
     
   /**
