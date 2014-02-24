@@ -288,7 +288,6 @@ class GroovyIOUtils extends IOUtils
     mkdirs(toFile.parentFile)
 
     File newFile = tempFileFactory(toFile)
-
     try
     {
       def res = closure(newFile)
@@ -313,56 +312,28 @@ class GroovyIOUtils extends IOUtils
     }
   }
 
-/**
-     * isFileRenameSuccessFul method creates a backup copy if file already exists and then
-     * rename temp file. If rename operation fails then it moves the backup file to original one.
+    /**
+     * The isFileRenameSuccessFul method first tries to rename the file through java.io.File.renameTo method
+     * and if it fails then it uses java.nio.file.Files.move method to move temp file to original file.
      *
      * @param newFile
      * @param toFile
-     * @return true when file rename operation was successful else false
+     * @return true when file rename operation is successful else false
      */
     static boolean isFileRenameSuccessFul(File newFile, File toFile)
     {
-        boolean isFileMoveSuccess = true
-        boolean isRenameSuccess = true
-        String fileName
-        String backFileName
-        Path toFilePath
-        try{
-            if (toFile.exists() && toFile.isFile()) {
-                try {
-                    fileName = toFile.canonicalPath
-                    backFileName = fileName + ".backup"
-                    toFilePath = Paths.get(fileName).toRealPath()
-                    Files.move(toFilePath, toFilePath.resolveSibling(backFileName), StandardCopyOption.REPLACE_EXISTING)
-                }catch (IOException ioExp) {
-                    isFileMoveSuccess = false
-                }
-            }else{
-                isFileMoveSuccess = false
-            }
-
-            //rename temp config file to original config file
-            isRenameSuccess =  newFile.renameTo(toFile)
-
-            /**
-             * Move backup copy to original if move was success and rename file was unsuccessful.
-             */
-            if(isFileMoveSuccess && !isRenameSuccess){
-                Path backFilePath = Paths.get(backFileName).toRealPath()
-                Files.move(backFilePath, backFilePath.resolveSibling(fileName), StandardCopyOption.REPLACE_EXISTING)
-            }
-        }finally{
-            //Delete the backed up file.
-            if(backFileName != null && !backFileName.isEmpty()){
-                File bkFile = new File(backFileName)
-                if(bkFile.exists())
-                    bkFile.delete()
+        if(newFile.renameTo(toFile)){
+            return true;
+        }else{
+            try{
+                Files.move(newFile.toPath(), toFile.toPath() , StandardCopyOption.REPLACE_EXISTING)
+                return true
+            }catch(IOException ioEx){
+                return false
             }
         }
-       return isRenameSuccess
     }
-    
+
   /**
    * Fetches the file pointed to by the location. The location can be <code>File</code>,
    * a <code>String</code> or <code>URI</code> and must contain a scheme. Example of locations:
