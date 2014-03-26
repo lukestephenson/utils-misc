@@ -107,7 +107,7 @@ public abstract class AbstractResourceProvider implements InternalResourceProvid
       try {
         relativePath = URLDecoder.decode(relativePath, "UTF-8");
         if (relativePath.contains("\\")) {
-          relativePath = relativePath.replaceAll("\\", "/");
+          relativePath = relativePath.replaceAll("\\\\", "/");
         }
       } catch (UnsupportedEncodingException ex) {
       }
