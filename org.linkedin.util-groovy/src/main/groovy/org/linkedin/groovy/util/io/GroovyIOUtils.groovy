@@ -31,6 +31,8 @@ import org.linkedin.groovy.util.lang.GroovyLangUtils
 import java.nio.file.Files
 import java.nio.file.NotDirectoryException
 import java.nio.file.Path
+import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
 
 /**
  * IO related utilities
@@ -286,12 +288,11 @@ class GroovyIOUtils extends IOUtils
     mkdirs(toFile.parentFile)
 
     File newFile = tempFileFactory(toFile)
-
     try
     {
       def res = closure(newFile)
 
-      if(newFile.exists() && !newFile.renameTo(toFile))
+      if(newFile.exists() && !isFileRenameSuccessFul(newFile, toFile))
       {
         // somehow the rename operation did not work => delete new file (will happen in the finally)
         // and throw an exception thus effectively leaving the file system in the same state as
@@ -312,6 +313,28 @@ class GroovyIOUtils extends IOUtils
       }
     }
   }
+
+    /**
+     * The isFileRenameSuccessFul method first tries to rename the file through java.io.File.renameTo method
+     * and if it fails then it uses java.nio.file.Files.move method to move temp file to original file.
+     *
+     * @param newFile
+     * @param toFile
+     * @return true when file rename operation is successful else false
+     */
+    static boolean isFileRenameSuccessFul(File newFile, File toFile)
+    {
+        if(newFile.renameTo(toFile)){
+            return true;
+        }else{
+            try{
+                Files.move(newFile.toPath(), toFile.toPath() , StandardCopyOption.REPLACE_EXISTING)
+                return true
+            }catch(IOException ioEx){
+                return false
+            }
+        }
+    }
 
   /**
    * Fetches the file pointed to by the location. The location can be <code>File</code>,
