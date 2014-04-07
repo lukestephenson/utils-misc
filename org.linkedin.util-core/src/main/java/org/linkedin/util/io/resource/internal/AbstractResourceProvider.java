@@ -103,15 +103,15 @@ public abstract class AbstractResourceProvider implements InternalResourceProvid
     if(relativePath == null)
       return null;
 
-    if (isWindowsOS()) {
-      try {
-        relativePath = URLDecoder.decode(relativePath, "UTF-8");
-        if (relativePath.contains("\\")) {
-          relativePath = relativePath.replaceAll("\\\\", "/");
-        }
-      } catch (UnsupportedEncodingException ex) {
-      }
-    }
+    // if (isWindowsOS()) {
+    //   try {
+    //     relativePath = URLDecoder.decode(relativePath, "UTF-8");
+    //     if (relativePath.contains("\\")) {
+    //       relativePath = relativePath.replaceAll("\\\\", "/");
+    //     }
+    //   } catch (UnsupportedEncodingException ex) {
+    //   }
+    // }
 
     URI relativeURI = URI.create(relativePath).normalize(); // normalize removes leading . 
 
